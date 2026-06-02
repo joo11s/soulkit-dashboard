@@ -84,6 +84,33 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 }
 .pixel-char canvas{width:48px;height:48px;image-rendering:pixelated}
 
+/* ── CHARACTER ANIMATIONS ── */
+
+/* IDLE: slow breathing (1px up/down) */
+@keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+.agent-card[data-status="IDLE"] .pixel-char{animation:breathe 4s ease-in-out infinite}
+
+/* RUNNING: fast typing bounce */
+@keyframes typing{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.agent-card[data-status="RUNNING"] .pixel-char{animation:typing .3s ease-in-out infinite}
+
+/* DONE: celebrate bounce (arms raised) */
+@keyframes celebrate{
+  0%,100%{transform:translateY(0) scale(1)}
+  40%,60%{transform:translateY(-4px) scale(1.05)}
+}
+.agent-card[data-status="DONE"] .pixel-char{animation:celebrate 2s ease-in-out infinite}
+
+/* ERROR: urgent shake (left/right) */
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  15%{transform:translateX(-3px)}
+  35%{transform:translateX(3px)}
+  55%{transform:translateX(-2px)}
+  75%{transform:translateX(2px)}
+}
+.agent-card[data-status="ERROR"] .pixel-char{animation:shake .5s ease-in-out infinite}
+
 /* ── DESK ── */
 .desk{
   width:56px;height:10px;background:var(--bg2);
@@ -94,14 +121,114 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   content:'';position:absolute;top:2px;left:8px;right:8px;height:3px;
   background:var(--border2);border-radius:1px;
 }
-/* monitor on desk */
+
+/* ── MONITOR ── */
 .desk-monitor{
-  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
-  width:14px;height:10px;background:var(--bg3);border:1px solid var(--border);
+  position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  width:16px;height:12px;background:var(--bg3);border:1px solid var(--border);
+  overflow:hidden;
 }
-.desk-monitor::after{
-  content:'';position:absolute;bottom:-4px;left:4px;width:6px;height:3px;
-  background:var(--border);
+.desk-monitor::before{
+  /* stand */
+  content:'';position:absolute;bottom:-4px;left:5px;width:6px;height:3px;
+  background:var(--border);z-index:1;
+}
+
+/* monitor screen */
+.monitor-screen{
+  position:absolute;top:1px;left:1px;right:2px;bottom:1px;
+  background:#08080f;
+  transition:background .3s;
+}
+
+/* monitor power light (top-right corner of monitor frame) */
+.monitor-light{
+  position:absolute;top:1px;right:1px;
+  width:2px;height:2px;border-radius:50%;
+  background:var(--text3);
+  transition:background .2s,box-shadow .2s;
+}
+
+/* ── MONITOR STATES ── */
+
+/* IDLE: dark screen, no light */
+.agent-card[data-status="IDLE"] .monitor-screen{background:#08080f}
+.agent-card[data-status="IDLE"] .monitor-light{background:var(--text3);box-shadow:none}
+
+/* RUNNING: green light + code-flickering screen */
+.agent-card[data-status="RUNNING"] .monitor-light{
+  background:#52b788;
+  box-shadow:0 0 4px #52b788,0 0 8px rgba(82,183,136,.4);
+}
+@keyframes screen-code{
+  0%  {background:#0d1f0d}
+  25% {background:#08080f}
+  50% {background:#0f2a0f}
+  75% {background:#06100a}
+  100%{background:#0d1f0d}
+}
+.agent-card[data-status="RUNNING"] .monitor-screen{
+  animation:screen-code .35s steps(4) infinite;
+}
+
+/* DONE: blue light + bright screen */
+.agent-card[data-status="DONE"] .monitor-light{
+  background:#60a5fa;
+  box-shadow:0 0 4px #60a5fa,0 0 8px rgba(96,165,250,.4);
+}
+.agent-card[data-status="DONE"] .monitor-screen{background:#0d1a2e}
+
+/* ERROR: red light + red flickering screen */
+.agent-card[data-status="ERROR"] .monitor-light{
+  background:#f87171;
+  box-shadow:0 0 4px #f87171,0 0 8px rgba(248,113,113,.4);
+}
+@keyframes screen-error{
+  0%,100%{background:#2a0808}
+  40%    {background:#08080f}
+  70%    {background:#1a0404}
+}
+.agent-card[data-status="ERROR"] .monitor-screen{
+  animation:screen-error .5s steps(3) infinite;
+}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap{
+  align-self:stretch;
+  height:3px;background:var(--bg);border-radius:2px;
+  overflow:hidden;position:relative;
+}
+.progress-bar{
+  height:100%;border-radius:2px;
+  background:var(--idle-t);
+  width:0%;
+  transition:width .4s ease,background .3s;
+}
+
+/* IDLE: empty, stopped */
+.agent-card[data-status="IDLE"] .progress-bar{
+  width:0%;background:var(--idle-t);animation:none;
+}
+
+/* RUNNING: 40% bar bouncing left ↔ right */
+@keyframes progress-bounce{
+  from{margin-left:0%}
+  to  {margin-left:60%}
+}
+.agent-card[data-status="RUNNING"] .progress-bar{
+  width:40%;background:var(--running-t);
+  animation:progress-bounce 1.4s ease-in-out infinite alternate;
+  transition:none;
+}
+
+/* DONE: full width, green */
+.agent-card[data-status="DONE"] .progress-bar{
+  width:100%;background:var(--done-t);animation:none;
+}
+
+/* ERROR: full width, red */
+.agent-card[data-status="ERROR"] .progress-bar{
+  width:100%;background:var(--error-t);animation:none;
 }
 
 /* ── AGENT META ── */
@@ -117,14 +244,6 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   font-size:7px;color:var(--text3);text-align:center;max-width:110px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;
 }
-
-/* ── RUNNING ANIMATION ── */
-@keyframes typing{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-1px)}75%{transform:translateX(1px)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.agent-card[data-status="RUNNING"] .pixel-char{animation:typing .4s ease-in-out infinite}
-.agent-card[data-status="ERROR"] .pixel-char{animation:shake .5s ease-in-out infinite}
-.agent-card[data-status="DONE"] .pixel-char{animation:float 3s ease-in-out infinite}
 
 /* ── STATS BAR ── */
 .stats-bar{
@@ -205,14 +324,26 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="agents-row">
       <div class="agent-card" id="agent-plan" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-plan" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">PLAN</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
       </div>
       <div class="agent-card" id="agent-strategy" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-strategy" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">STRATEGY</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
@@ -226,21 +357,39 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="agents-row">
       <div class="agent-card" id="agent-code" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-code" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">CODE</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
       </div>
       <div class="agent-card" id="agent-review" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-review" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">REVIEW</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
       </div>
       <div class="agent-card" id="agent-ui" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-ui" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">UI</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
@@ -254,14 +403,26 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="agents-row">
       <div class="agent-card" id="agent-test" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-test" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">TEST</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
       </div>
       <div class="agent-card" id="agent-validate" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-validate" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">VALIDATE</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
@@ -275,14 +436,26 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="agents-row">
       <div class="agent-card" id="agent-deploy" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-deploy" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">DEPLOY</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
       </div>
       <div class="agent-card" id="agent-monitor" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-monitor" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">MONITOR</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
@@ -296,21 +469,39 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="agents-row">
       <div class="agent-card" id="agent-feedback" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-feedback" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">FEEDBACK</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
       </div>
       <div class="agent-card" id="agent-approval" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-approval" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">APPROVAL</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
       </div>
       <div class="agent-card" id="agent-report" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-report" width="12" height="16"></canvas></div>
-        <div class="desk"><div class="desk-monitor"></div></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
         <div class="agent-name">REPORT</div>
         <div class="agent-status">IDLE</div>
         <div class="agent-msg">—</div>
@@ -332,7 +523,6 @@ const POLL_URL = 'https://n8n.wonflowai.com/webhook/soulkit-progress-read';
 const POLL_INTERVAL = 30000;
 
 // ── PIXEL CHAR PALETTES ──────────────────────────────────────
-// color palette per agent (hair, shirt)
 const PALETTES = {
   plan:     { hair:'#f5e6c8', shirt:'#7c3aed', skin:'#f0c070' },
   strategy: { hair:'#a78bfa', shirt:'#5b21b6', skin:'#f0c070' },
@@ -348,9 +538,9 @@ const PALETTES = {
   report:   { hair:'#94a3b8', shirt:'#1e293b', skin:'#f0c070' },
 };
 
-// pixel art grids: 12x16, row-major, values: 0=transparent, 1=hair, 2=skin, 3=shirt, 4=pants, 5=screen(running)
+// 0=transparent 1=hair 2=skin 3=shirt 4=pants
 const FRAMES = {
-  // IDLE: sitting at desk
+  // IDLE: sitting, arms resting on desk
   IDLE: [
     [0,0,0,1,1,1,1,0,0,0,0,0],
     [0,0,1,1,1,1,1,1,0,0,0,0],
@@ -369,7 +559,7 @@ const FRAMES = {
     [0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0],
   ],
-  // RUNNING: arms up typing
+  // RUNNING: arms forward, typing
   RUNNING: [
     [0,0,0,1,1,1,1,0,0,0,0,0],
     [0,0,1,1,1,1,1,1,0,0,0,0],
@@ -388,7 +578,7 @@ const FRAMES = {
     [0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0],
   ],
-  // DONE: standing, arms raised (celebrate)
+  // DONE: both arms raised (thumbs up / celebrate)
   DONE: [
     [0,0,0,1,1,1,1,0,0,0,0,0],
     [0,0,1,1,1,1,1,1,0,0,0,0],
@@ -407,7 +597,7 @@ const FRAMES = {
     [0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0],
   ],
-  // ERROR: hand on head
+  // ERROR: hand on head, slouched
   ERROR: [
     [0,0,0,1,1,1,1,0,0,0,0,0],
     [0,0,1,1,1,1,1,1,0,0,0,0],
@@ -434,7 +624,7 @@ function drawChar(canvasId, agent, status) {
   const ctx = canvas.getContext('2d');
   const pal = PALETTES[agent] || PALETTES.plan;
   const frame = FRAMES[status] || FRAMES.IDLE;
-  const colors = ['transparent', pal.hair, pal.skin, pal.shirt, '#374151', '#a78bfa'];
+  const colors = ['transparent', pal.hair, pal.skin, pal.shirt, '#374151'];
 
   ctx.clearRect(0, 0, 12, 16);
   for (let r = 0; r < 16; r++) {
@@ -454,7 +644,7 @@ function initChars() {
 // ── STATE ────────────────────────────────────────────────────
 let activityLog = [];
 
-function updateAgent(agent, status, message, taskId) {
+function updateAgent(agent, status, message) {
   const card = document.getElementById('agent-' + agent);
   if (!card) return;
 
@@ -474,9 +664,9 @@ function updateStats(agents) {
     counts[s] = (counts[s] || 0) + 1;
   });
   document.getElementById('cnt-running').textContent = counts.RUNNING;
-  document.getElementById('cnt-done').textContent = counts.DONE;
-  document.getElementById('cnt-error').textContent = counts.ERROR;
-  document.getElementById('cnt-idle').textContent = counts.IDLE;
+  document.getElementById('cnt-done').textContent    = counts.DONE;
+  document.getElementById('cnt-error').textContent   = counts.ERROR;
+  document.getElementById('cnt-idle').textContent    = counts.IDLE;
 }
 
 function addLog(agent, status, message, updatedAt) {
@@ -513,9 +703,8 @@ async function poll() {
       const prev = prevData[agent];
       const status = row.status || 'IDLE';
       const message = row.message || '';
-      updateAgent(agent, status, message, row.task_id);
+      updateAgent(agent, status, message);
 
-      // 상태 변경된 것만 로그에 추가
       if (!prev || prev.status !== status || prev.updated_at !== row.updated_at) {
         addLog(agent, status, message, row.updated_at);
       }
