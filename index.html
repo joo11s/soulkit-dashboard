@@ -355,6 +355,19 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   <div class="team-room">
     <div class="room-label">Dev Team</div>
     <div class="agents-row">
+      <div class="agent-card" id="agent-dev" data-agent="dev" data-status="IDLE">
+        <div class="pixel-char"><canvas id="char-dev" width="12" height="16"></canvas></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
+        <div class="agent-name">DEV</div>
+        <div class="agent-status">IDLE</div>
+        <div class="agent-msg">—</div>
+      </div>
       <div class="agent-card" id="agent-code" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-code" width="12" height="16"></canvas></div>
         <div class="desk">
@@ -434,6 +447,19 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   <div class="team-room">
     <div class="room-label">Ops Team</div>
     <div class="agents-row">
+      <div class="agent-card" id="agent-ops" data-agent="ops" data-status="IDLE">
+        <div class="pixel-char"><canvas id="char-ops" width="12" height="16"></canvas></div>
+        <div class="desk">
+          <div class="desk-monitor">
+            <div class="monitor-screen"></div>
+            <div class="monitor-light"></div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar"></div></div>
+        <div class="agent-name">OPS</div>
+        <div class="agent-status">IDLE</div>
+        <div class="agent-msg">—</div>
+      </div>
       <div class="agent-card" id="agent-deploy" data-status="IDLE">
         <div class="pixel-char"><canvas id="char-deploy" width="12" height="16"></canvas></div>
         <div class="desk">
@@ -526,11 +552,13 @@ const POLL_INTERVAL = 30000;
 const PALETTES = {
   plan:     { hair:'#f5e6c8', shirt:'#7c3aed', skin:'#f0c070' },
   strategy: { hair:'#a78bfa', shirt:'#5b21b6', skin:'#f0c070' },
+  dev:      { hair:'#60a5fa', shirt:'#1e3a8f', skin:'#f0c070' },
   code:     { hair:'#52b788', shirt:'#1e3a5f', skin:'#f0c070' },
   review:   { hair:'#f87171', shirt:'#7f1d1d', skin:'#f0c070' },
   ui:       { hair:'#fbbf24', shirt:'#92400e', skin:'#f0c070' },
   test:     { hair:'#34d399', shirt:'#065f46', skin:'#f0c070' },
   validate: { hair:'#60a5fa', shirt:'#1e40af', skin:'#f0c070' },
+  ops:      { hair:'#fb923c', shirt:'#9a3412', skin:'#f0c070' },
   deploy:   { hair:'#f5e6c8', shirt:'#374151', skin:'#f0c070' },
   monitor:  { hair:'#c084fc', shirt:'#4c1d95', skin:'#f0c070' },
   feedback: { hair:'#fb7185', shirt:'#881337', skin:'#f0c070' },
