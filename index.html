@@ -304,7 +304,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   <div class="logo">SOUL<span>KIT</span> OFFICE</div>
   <div class="header-right">
     <div class="live-badge"><span class="live-dot"></span>LIVE</div>
-    <div class="refresh-info" id="countdown">REFRESH 2min</div>
+    <div class="refresh-info" id="countdown">REFRESH 10min</div>
   </div>
 </header>
 
@@ -546,7 +546,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
 const POLL_URL = 'https://n8n.wonflowai.com/webhook/soulkit-progress-read';
-const POLL_INTERVAL = 120000;
+const POLL_INTERVAL = 600000;
 
 // ── PIXEL CHAR PALETTES ──────────────────────────────────────
 const PALETTES = {
@@ -718,7 +718,7 @@ function renderLog() {
 
 // ── POLLING ──────────────────────────────────────────────────
 let prevData = {};
-let countdown = 120;
+let countdown = 600;
 
 async function poll() {
   try {
@@ -753,7 +753,7 @@ async function poll() {
 function tick() {
   countdown--;
   if (countdown <= 0) {
-    countdown = 120;
+    countdown = 600;
     poll();
   }
   document.getElementById('countdown').textContent = `REFRESH ${countdown}s`;
